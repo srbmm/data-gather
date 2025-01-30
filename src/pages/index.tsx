@@ -1,17 +1,24 @@
 import {CustomTextInput} from "~/components/inputs";
 import {DynamicForm} from "~/components/form/DynamicForm";
 import {useState} from "react";
+import {FormWrapper} from "~/components/form/FormWrapper";
+import {FormMapper} from "~/components/form/FormMapper";
+import {Form} from "~/types";
 
 export default function  MultiFormPage () {
-  const [formData, setFormData] = useState<Record<string, any>>({});
+  const [formData, setFormData] = useState<Record<string, unknown>>({});
 
-  const handleFormChange = (data: Record<string, any>) => {
+  const handleFormChange = (data: Record<string, unknown>) => {
     setFormData(data);
   };
+  const handleFormChangeError = (errors) => {
+    console.log(errors);
+  };
+
 
   const formFields = [
     {
-      name: "firstName",
+      id: "firstName",
       type: "text",
       label: "First Name",
       required: true,
@@ -21,19 +28,19 @@ export default function  MultiFormPage () {
       errorText: "Only letters are allowed",
     },
     {
-      name: "lastName",
+      id: "lastName",
       type: "text",
       label: "Last Name",
       required: true,
     },
     {
-      name: "bio",
+      id: "bio",
       type: "textarea",
       label: "Bio",
       required: false,
     },
     {
-      name: "favoriteColor",
+      id: "favoriteColor",
       type: "select",
       label: "Favorite Color",
       options: [
@@ -44,7 +51,7 @@ export default function  MultiFormPage () {
       required: true,
     },
     {
-      name: "profilePicture",
+      id: "profilePicture",
       type: "file",
       label: "Profile Picture",
       validation: {
@@ -53,21 +60,43 @@ export default function  MultiFormPage () {
       },
     },
     {
-      name: "newsletter",
+      id: "newsletter",
       type: "checkbox",
       label: "Subscribe to newsletter",
       checkboxes: [
-        { id: "daily", label: "Daily" },
-        { id: "weekly", label: "Weekly" },
+        { value: "daily", label: "Daily" },
+        { value: "weekly", label: "Weekly" },
       ],
     },
   ];
+  const form1: Form = {
+    name: 'test1',
+    description: 'testtt',
+    id: 'test1',
+    topic: "test1",
+    fields: formFields,
+  }
+  const form2: Form = {
+    name: 'test2',
+    description: 'testtt222',
+    id: 'test2',
+    topic: "test2",
+    fields: formFields,
+  }
+  const form3: Form = {
+    name: 'test3',
+    description: 'testtttttttt',
+    id: 'test3',
+    topic: "test3",
+    fields: formFields,
+  }
+  const formss = [form1, form2, form3];
+
   return (
       <div className="min-h-screen bg-gray-100 py-10 px-5">
         <div className="container">
-          <h1>Dynamic Form</h1>
-          <DynamicForm fields={formFields} onChange={handleFormChange} />
-          <pre>{JSON.stringify(formData, null, 2)}</pre>
+          <FormMapper forms={formss} onChangeError={handleFormChangeError} onChange={handleFormChange} />
+>          <pre>{JSON.stringify(formData, null, 2)}</pre>
         </div>
         <div className="max-w-7xl mx-auto">
           <h1 className="text-3xl font-bold text-center mb-10">Multi-Form Page</h1>

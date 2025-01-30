@@ -1,14 +1,10 @@
-import { Label, Select, type SelectProps } from "flowbite-react";
-import {type OptionType} from "~/types";
+import { Label, Select } from "flowbite-react";
+import {CustomSelectProps} from "~/components/inputs/types";
 
-interface Props extends SelectProps{
-    errorText?: string;
-    label?: string;
-    options: OptionType[];
-}
 
-export function CustomSelect(props: Props) {
-    const mappedOption = props.options.map(option =>
+
+export function CustomSelect(props: CustomSelectProps) {
+    const mappedOption = props.options?.map(option =>
         <option key={option.value} value={option.value}>{option.label}</option>
     )
 

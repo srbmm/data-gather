@@ -3,12 +3,10 @@ import {
     type TextareaProps,
     Label
 } from "flowbite-react";
+import {CustomTextareaProps} from "~/components/inputs/types";
 
-interface Props extends TextareaProps{
-    errorText?: string;
-    label?: string;
-}
-export const CustomTextarea = (props: Props) => {
+
+export const CustomTextarea = (props: CustomTextareaProps) => {
     return <div className="flext flex-col p-1 gap-1">
         { props?.label && <Label htmlFor={props.id}>{props?.label}</Label> }
         <Textarea {...props} />

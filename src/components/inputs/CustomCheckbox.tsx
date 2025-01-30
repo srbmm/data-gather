@@ -1,16 +1,11 @@
-import { Checkbox, Label, type CheckboxProps } from "flowbite-react";
+import { Checkbox, Label } from "flowbite-react";
+import {CustomCheckBoxesProps} from "~/components/inputs/types";
 
-interface Props {
-    errorText?: string;
-    label?: string;
-    checkboxes: CheckboxProps[];
-    checked: { [key: string]: boolean };
-    onChange?: (value: { [key: string]: boolean }) => void;
-}
 
-export const CustomCheckbox = (props: Props) => {
+
+export const CustomCheckbox = (props: CustomCheckBoxesProps) => {
     // Compute check values
-    const computedChecked: { [key: string]: boolean } = {};
+    const computedChecked: Record<string, boolean> = {};
     for (const item of props.checkboxes) {
         if (!item.id) return;
         let isChecked = props.checked[item.id];
@@ -27,15 +22,16 @@ export const CustomCheckbox = (props: Props) => {
         }
     };
 
-    const mappedCheckboxes = props.checkboxes.map((item) => (
-        <Checkbox
-            key={item.id}
-            {...item}
-            checked={computedChecked[item.id] || false}
-            onChange={(e) => handleCheckboxChange(item.id, e.target.checked)}
-        />
+    const mappedCheckboxes = props.checkboxes?.map((item) => (
+        <div className="flex gap-1" key={item.id}>
+            <Checkbox
+                {...item}
+                checked={computedChecked[item.id] || false}
+                onChange={(e) => handleCheckboxChange(item.id, e.target.checked)}
+            />
+            <Label>{item.label}</Label>
+        </div>
     ));
-
     return (
         <div className="flex flex-col p-1 gap-1">
             {props.label && <Label>{props.label}</Label>}

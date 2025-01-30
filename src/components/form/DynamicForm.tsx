@@ -6,41 +6,29 @@ import {
     CustomSelect,
     CustomFileInput,
     CustomCheckbox,
-} from "./../inputs"; // Import your custom components
+} from "./../inputs";
+import {DynamicFormProps, FormFieldProps} from "~/components/form/types";
 
-interface FormField {
-    name: string;
-    type: "text" | "textarea" | "select" | "file" | "checkbox";
-    label?: string;
-    id?: string;
-    options?: { value: string; label: string }[]; // For select fields
-    required?: boolean;
-    validation?: {
-        regex?: RegExp;
-        maxSize?: number; // For files
-        fileType?: string[]; // Allowed file types
-    };
-    errorText?: string;
-    checkboxes?: { id: string; label: string }[]; // For checkboxes
-}
 
-interface DynamicFormProps {
-    fields: FormField[];
-    onChange: (data: Record<string, any>) => void;
-}
 
-export const DynamicForm: React.FC<DynamicFormProps> = ({ fields, onChange }) => {
+export const DynamicForm: React.FC<DynamicFormProps> = ({ fields, onChange, onChangeError }) => {
     const { control, watch, formState: { errors }, setValue } = useForm({
         mode: "onChange",
     });
 
-    const watchAllFields = watch();
+   React.useEffect(() => {
+        const { unsubscribe } = watch((value) => {
+            onChange(value);
+        })
+        return () => unsubscribe()
+    }, [watch])
 
     React.useEffect(() => {
-        onChange(watchAllFields);
-    }, [watchAllFields, onChange]);
+        onChangeError(errors);
+    }, [{...errors}])
 
-    const renderField = (field: FormField) => {
+
+    const renderField = (field: FormFieldProps) => {
         const { name, type, label, id, options, required, validation, errorText, checkboxes } = field;
 
         const fieldId = id ?? name; // Ensure every input has an ID
@@ -49,7 +37,7 @@ export const DynamicForm: React.FC<DynamicFormProps> = ({ fields, onChange }) =>
             case "text":
                 return (
                     <Controller
-                        name={name}
+                        name={id}
                         control={control}
                         rules={{
                             required: required ? `${label ?? name} is required` : undefined,
@@ -65,7 +53,7 @@ export const DynamicForm: React.FC<DynamicFormProps> = ({ fields, onChange }) =>
                                 {...field}
                                 id={fieldId}
                                 label={label}
-                                errorText={errors[name]?.message as string}
+                                errorText={errors[id]?.message as string}
                             />
                         )}
                     />
@@ -73,7 +61,7 @@ export const DynamicForm: React.FC<DynamicFormProps> = ({ fields, onChange }) =>
             case "textarea":
                 return (
                     <Controller
-                        name={name}
+                        name={id}
                         control={control}
                         rules={{
                             required: required ? `${label ?? name} is required` : undefined,
@@ -83,7 +71,7 @@ export const DynamicForm: React.FC<DynamicFormProps> = ({ fields, onChange }) =>
                                 {...field}
                                 id={fieldId}
                                 label={label}
-                                errorText={errors[name]?.message as string}
+                                errorText={errors[id]?.message as string}
                             />
                         )}
                     />
@@ -91,7 +79,7 @@ export const DynamicForm: React.FC<DynamicFormProps> = ({ fields, onChange }) =>
             case "select":
                 return (
                     <Controller
-                        name={name}
+                        name={id}
                         control={control}
                         rules={{
                             required: required ? `${label ?? name} is required` : undefined,
@@ -101,7 +89,7 @@ export const DynamicForm: React.FC<DynamicFormProps> = ({ fields, onChange }) =>
                                 {...field}
                                 id={fieldId}
                                 label={label}
-                                errorText={errors[name]?.message as string}
+                                errorText={errors[id]?.message as string}
                                 options={options ?? []}
                             />
                         )}
@@ -110,12 +98,13 @@ export const DynamicForm: React.FC<DynamicFormProps> = ({ fields, onChange }) =>
             case "file":
                 return (
                     <Controller
-                        name={name}
+                        name={id}
                         control={control}
                         rules={{
                             required: required ? `${label ?? name} is required` : undefined,
                             validate: (fileList: FileList) => {
                                 const file = fileList?.[0];
+                                console.log(validation?.fileType?.join(", "))
                                 if (file?.size && validation?.maxSize && file?.size > validation.maxSize) {
                                     return `File size exceeds ${validation.maxSize / 1024 / 1024}MB`;
                                 }
@@ -132,9 +121,10 @@ export const DynamicForm: React.FC<DynamicFormProps> = ({ fields, onChange }) =>
                         render={({ field }) => (
                             <CustomFileInput
                                 {...field}
+                                accept={validation?.fileType?.join(", ")}
                                 id={fieldId}
                                 label={label}
-                                errorText={errors[name]?.message as string}
+                                errorText={errors[id]?.message as string}
                             />
                         )}
                     />
@@ -142,17 +132,17 @@ export const DynamicForm: React.FC<DynamicFormProps> = ({ fields, onChange }) =>
             case "checkbox":
                 return (
                     <Controller
-                        name={name}
+                        name={id}
                         control={control}
                         render={({ field: { value, onChange } }) => (
                             <CustomCheckbox
                                 label={label}
-                                checkboxes={(checkboxes ?? []).map(cb => ({ ...cb, id: cb.id || cb.label }))}
-                                checked={value || {}}
+                                checkboxes={(checkboxes ?? [])?.map(cb => ({ ...cb, id: cb.value || cb.label }))}
+                                checked={value ?? {}}
                                 onChange={(updatedValue) => {
                                     onChange({ ...value, ...updatedValue });
                                 }}
-                                errorText={errors[name]?.message as string}
+                                errorText={errors[id]?.message as string}
                             />
                         )}
                     />
@@ -164,8 +154,8 @@ export const DynamicForm: React.FC<DynamicFormProps> = ({ fields, onChange }) =>
 
     return (
         <div className="flex flex-col gap-4">
-            {fields.map((field) => (
-                <div key={field.name}>{renderField(field)}</div>
+            {fields?.map((field) => (
+                <div key={field.id}>{renderField(field)}</div>
             ))}
         </div>
     );
