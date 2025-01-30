@@ -1,29 +1,20 @@
-# Create T3 App
+# Form Gather
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+**Form Gather** is an open-source, self-hostable platform for collecting and managing data through customizable forms. Designed for flexibility, privacy, and ease of use, the platform allows users to create dynamic surveys, gather responses securely, and export the data in standard formats. It is ideal for use in machine learning, academic research, customer feedback, and event registrations.
 
-## What's next? How do I make an app with this?
+## 🚀 Overview
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+The project provides an intuitive admin panel that makes it easy to create and manage surveys. Users can securely store responses, customize forms, and deploy the platform on their own servers for complete privacy and control. Whether you're conducting research, gathering feedback, or collecting data for machine learning tasks, **Form Gather** is a versatile and scalable solution.
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+## 🛠 Features
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+- **Admin Panel**: A user-friendly interface to create forms, manage surveys, and access collected data.
+- **Customizability**: An open-source codebase that allows you to modify the platform’s design and functionality.
+- **Scalability**: Host the platform on your own server, giving you complete control over the hosting environment and performance.
+- **Data Export**: Securely store responses and export data in standard formats such as CSV and JSON for easy integration with other tools and services.
+  
+## 🎯 Project Goals
 
-## Learn More
-
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
-
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
-
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
-
-## How do I deploy this?
-
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+- Develop a platform that simplifies the process of creating and deploying data-gathering forms.
+- Ensure the tool is open-source and self-hostable, providing users with complete control.
+- Implement secure data storage and enable easy data export to facilitate further analysis and integration.
