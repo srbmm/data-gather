@@ -8,6 +8,7 @@ export function CustomSelect(props: CustomSelectProps) {
         <option key={option.value} value={option.value}>{option.label}</option>
     )
 
+    mappedOption?.unshift(<option key={""} value={""}>Select One</option>)
     return (
         <div className="flext flex-col p-1 gap-1">
             { props?.label && <Label htmlFor={props.id}>{props?.label}</Label> }
