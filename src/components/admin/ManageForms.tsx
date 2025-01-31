@@ -189,7 +189,6 @@ const FormManager = () => {
     setForms(formsData);
   }, [formsData]);
 
-<<<<<<< HEAD
   const onSubmit = (data: FormData) => {
     if (currentForm) {
       setForms((prev) =>
@@ -208,17 +207,6 @@ const FormManager = () => {
     }
     setModalOpen(false);
   };
-=======
-    const createManyForms = api.form.createMany.useMutation();
-    const handleCreateForms = () => { 
-        createManyForms.mutate(forms); 
-    }
-
-    return (
-        <div className="p-6">
-            <h2 className="text-xl font-bold text-center">Manage Forms</h2>
-            <Button onClick={() => openModal()}>Create New Form</Button>
->>>>>>> 32a236449d21f7b1c2109608845b1dfdfdd51024
 
   const deleteForm = (id: string) => {
     setForms(forms.filter((form) => form._id !== id));
@@ -254,7 +242,6 @@ const FormManager = () => {
                 </Button>
               </div>
             </div>
-<<<<<<< HEAD
           );
         })}
       </div>
@@ -279,16 +266,6 @@ const FormManager = () => {
               placeholder="Description"
               className="mt-2"
             ></Textarea>
-=======
-            <Button onClick={handleCreateForms}>Save</Button>
-            <Modal show={isModalOpen} onClose={() => setModalOpen(false)}>
-                <Modal.Header>Create/Edit Form</Modal.Header>
-                <Modal.Body>
-                    <form onSubmit={handleSubmit(onSubmit)}>
-                        <TextInput {...register("name", { required: true })} placeholder="Form Name" />
-                        <TextInput {...register("topic")} placeholder="Topic" className="mt-2" />
-                        <Textarea {...register("description")} placeholder="Description" className="mt-2"></Textarea>
->>>>>>> 32a236449d21f7b1c2109608845b1dfdfdd51024
 
             {fields.map((field, index) => (
               <FieldEditor
