@@ -73,6 +73,7 @@ const createEntrySchema = z.object({
 
 // Entry API Routes
 export const entryRouter = createTRPCRouter({
+<<<<<<< HEAD
     create: publicProcedure
         .input(createEntrySchema)
         .mutation(async ({ input }) => {
@@ -91,3 +92,16 @@ export const entryRouter = createTRPCRouter({
 });
 
 
+=======
+  create: publicProcedure
+    .input(createEntrySchema)
+    .mutation(async ({ input }) => {
+      const newEntry = new Entry({
+        id: crypto.randomUUID(),
+        ...input,
+      });
+      return await newEntry.save();
+  }),
+  
+})
+>>>>>>> 32a236449d21f7b1c2109608845b1dfdfdd51024
