@@ -23,7 +23,6 @@ const handleCreateForm = async (formData: any) => {
       name: "My Form",
       fields: [
         {
-          id: crypto.randomUUID(),
           name: "firstName",
           type: "text",
           label: "First Name",

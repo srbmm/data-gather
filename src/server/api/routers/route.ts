@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { Form } from "~/db/schema";
+import { Entry, Form } from "~/db/schema";
 
 
 const optionSchema = z.object({
@@ -43,7 +43,7 @@ export const formRouter = createTRPCRouter({
       return await newForm.save();
     }),
 
-  getById: publicProcedure
+  getOne: publicProcedure
     .input(z.string())
     .query( async ({ input }) => {
       const form = await Form.findOne({ id: input });
@@ -51,4 +51,32 @@ export const formRouter = createTRPCRouter({
       return form;
     }),
 
+  getAll: publicProcedure
+    .query( async () => {
+      const form = await Form.find()
+      if (!form) throw new Error('from not found');
+      return form;
+    }),
 });
+
+
+const formDataSchema = z.record(
+  z.string(),
+  z.record(z.string(), z.unknown())
+);
+
+const createEntrySchema = z.object({
+  formData: formDataSchema,
+});
+
+export const entryRouter = createTRPCRouter({
+  create: publicProcedure
+    .input(createEntrySchema)
+    .mutation(async ({ input }) => {
+      const newEntry = new Entry({
+        id: crypto.randomUUID(),
+        ...input,
+      });
+  }),
+  
+})

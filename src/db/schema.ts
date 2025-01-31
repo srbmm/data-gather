@@ -3,6 +3,8 @@ const { Schema } = mongoose;
 import { Form as F, FormField, OptionType } from "~/types";
 
 
+
+
 export interface FormDocument extends Omit<F, 'id'>, Document {}
 
 const OptionSchema = new Schema<OptionType>(
@@ -29,6 +31,7 @@ const FormFieldSchema = new Schema<FormField>(
             regex: String,
             maxSize: Number,
             fileType: [String],
+            required: false,
         },
         checkboxes: [OptionSchema],
     },
@@ -46,8 +49,49 @@ const FormSchema = new Schema<FormDocument>(
     { strict: false, timestamps: true },
 );
 
-// export const Form = mongoose.models.Form || mongoose.model<FormDocument>("Form", FormSchema);
 export const Form = 
   mongoose.models.Form 
     ? mongoose.models.Form as Model<FormDocument>
     : mongoose.model<FormDocument>("Form", FormSchema);
+
+
+//////
+
+interface FormData {
+  [key: string]: {
+    [key: string]: unknown;
+  };
+}
+
+interface EntryDocument extends Document {
+  id: String;
+  formData: FormData;
+  // we can also get user's data as well (ipAddress, browser, ...)
+}
+
+const EntrySchema = new Schema<EntryDocument>(
+{
+  id: { type: String, required: true },
+  formData: {
+    type: Map,
+    of: new Schema({
+      type: Map,
+      of: Schema.Types.Mixed
+    }, { _id: false })
+  },
+},
+  { timestamps: true },
+);
+
+EntrySchema.pre('save', function(next) {
+  if (!this.formData || Object.keys(this.formData).length === 0) {
+    const err = new Error('Empty data');
+    return next(err);
+  }
+  next();
+});
+
+export const Entry = 
+  mongoose.models.Entry 
+  ? mongoose.models.Entry as Model<EntryDocument>
+  : mongoose.model<EntryDocument>("Entry", EntrySchema);
