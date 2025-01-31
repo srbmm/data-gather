@@ -102,6 +102,7 @@ const FormMapper: React.FC<FormMapperProps> = ({ forms, onSubmit }) => {
         onClick={handleSubmit}
         className="w-full max-w-96 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
       >
+        //
         Submit
       </button>
     </div>

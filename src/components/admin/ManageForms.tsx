@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useForm, useFieldArray, Controller, useWatch } from "react-hook-form";
 import {Modal, Button, TextInput, Select, Checkbox, Label, Textarea} from "flowbite-react";
+import { api } from "~/utils/api";
 
 // Ensure you have these imports for handling the form and field data
 interface FormField {
@@ -151,6 +152,11 @@ const FormManager = () => {
         setForms(forms.filter((form) => form.id !== id));
     };
 
+    const createManyForms = api.form.createMany.useMutation();
+    const handleCreateForms = () => { 
+        createManyForms.mutate(forms); 
+    }
+
     return (
         <div className="p-6">
             <h2 className="text-xl font-bold text-center">Manage Forms</h2>
@@ -168,7 +174,7 @@ const FormManager = () => {
                     </div>
                 ))}
             </div>
-            <Button onClick={() => console.log(forms)}>Save</Button>
+            <Button onClick={handleCreateForms}>Save</Button>
             <Modal show={isModalOpen} onClose={() => setModalOpen(false)}>
                 <Modal.Header>Create/Edit Form</Modal.Header>
                 <Modal.Body>

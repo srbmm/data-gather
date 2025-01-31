@@ -1,6 +1,7 @@
 import FormMapper from "~/components/form/FormMapper";
 import {Form, FormsData} from "~/types";
 import {RandomQuestion} from "~/components/other/RandomQuestion";
+import { api } from "~/utils/api";
 
 export default function  MultiFormPage () {
   const formFields = [
@@ -84,8 +85,10 @@ export default function  MultiFormPage () {
     fields: formFields,
   }
   const forms = [form1, form2, form3];
+  const createData = api.entry.create.useMutation();
   const handleSubmit = (data: FormsData) => {
     console.log(data)
+    // createData.mutate(data)
   }
   return (
       <div className="min-h-screen bg-gray-100 py-10 px-5 flex items-center justify-center">

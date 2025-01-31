@@ -43,6 +43,16 @@ export const formRouter = createTRPCRouter({
       return await newForm.save();
     }),
 
+  createMany: publicProcedure
+    .input(z.array(createFormSchema))
+    .mutation(async ({ input }) => {
+      const formsToSave = input.map(formData => ({
+        id: crypto.randomUUID(),
+        ...formData
+      }));
+      return await Form.insertMany(formsToSave);
+    }),
+
   getOne: publicProcedure
     .input(z.string())
     .query( async ({ input }) => {
@@ -53,7 +63,7 @@ export const formRouter = createTRPCRouter({
 
   getAll: publicProcedure
     .query( async () => {
-      const form = await Form.find()
+      const form = await Form.find().sort();
       if (!form) throw new Error('from not found');
       return form;
     }),
@@ -77,6 +87,7 @@ export const entryRouter = createTRPCRouter({
         id: crypto.randomUUID(),
         ...input,
       });
+      return await newEntry.save();
   }),
   
 })
