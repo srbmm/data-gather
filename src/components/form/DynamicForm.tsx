@@ -74,14 +74,14 @@ const DynamicForm = forwardRef<
       name,
       type,
       label,
-      id,
       options,
       required,
       validation,
+        _id,
       errorText,
       checkboxes,
     } = field;
-    const fieldId = id; // Ensure every input has an ID
+    const fieldId = _id; // Ensure every input has an ID
 
     switch (type) {
       case "text":
@@ -103,7 +103,7 @@ const DynamicForm = forwardRef<
                 {...field}
                 id={fieldId}
                 label={label}
-                errorText={errors[id]?.message as string}
+                errorText={errors[name]?.message as string}
               />
             )}
           />
@@ -121,7 +121,7 @@ const DynamicForm = forwardRef<
                 {...field}
                 id={fieldId}
                 label={label}
-                errorText={errors[id]?.message as string}
+                errorText={errors[name]?.message as string}
               />
             )}
           />
@@ -139,7 +139,7 @@ const DynamicForm = forwardRef<
                 {...field}
                 id={fieldId}
                 label={label}
-                errorText={errors[id]?.message as string}
+                errorText={errors[name]?.message as string}
                 options={options ?? []}
               />
             )}
@@ -184,11 +184,11 @@ const DynamicForm = forwardRef<
                     fileSize: uploadedFile.fileSize,
                   });
                 }}
-                accept={validation?.fileType?.join(", ")}
+                accept={validation?.fileType?.join && validation.fileType.join(", ")}
                 id={fieldId}
                 value={value}
                 label={label}
-                errorText={errors[id]?.message as string}
+                errorText={errors[name]?.message as string}
               />
             )}
           />
@@ -209,7 +209,7 @@ const DynamicForm = forwardRef<
                 onChange={(updatedValue) => {
                   onChange({ ...value, ...updatedValue });
                 }}
-                errorText={errors[id]?.message as string}
+                errorText={errors[_id]?.message as string}
               />
             )}
           />
@@ -221,7 +221,7 @@ const DynamicForm = forwardRef<
 
   return (
     <div className="flex flex-col gap-4">
-      {fields?.map((field) => <div key={field.id}>{renderField(field)}</div>)}
+      {fields?.map((field) => <div key={field.name}>{renderField(field)}</div>)}
     </div>
   );
 });

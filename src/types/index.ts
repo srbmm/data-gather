@@ -6,7 +6,7 @@ export interface OptionType {
 }
 
 export interface FormField {
-    id: string;
+    _id: string;
     name: string;
     type: "text" | "textarea" | "select" | "file" | "checkbox";
     label?: string;

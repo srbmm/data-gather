@@ -71,7 +71,7 @@ const FormMapper: React.FC<FormMapperProps> = ({ forms, onSubmit }) => {
   }, [errors, formsData, onSubmit, forms]);
 
   const mappedForms = forms.map((form) => (
-    <div key={form.id} className="flex w-full items-center justify-center">
+    <div key={form._id} className="flex w-full items-center justify-center">
       <FormWrapper
         topic={form.topic}
         description={form.description}

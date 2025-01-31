@@ -81,6 +81,13 @@ export const entryRouter = createTRPCRouter({
             });
             return await newEntry.save();
         }),
+    // getAll: publicProcedure
+    //     .query(async ({ input }) => {
+    //         const newEntry = new Entry({
+    //             ...input,
+    //         });
+    //         return await newEntry.save();
+    //     }),
 });
 
 

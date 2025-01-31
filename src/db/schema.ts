@@ -38,7 +38,7 @@ const FormFieldSchema = new Schema<FormField>(
     required: { type: Boolean, required: false },
     validation: {
       regex: String,
-      maxSize: Number,
+      maxSize: { type: Number, required: false },
       fileType: String,
     },
     checkboxes: { type: [OptionSchema], required: false },

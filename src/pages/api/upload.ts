@@ -1,89 +1,45 @@
-import fs from 'fs';
-import path from 'path';
-import { IncomingMessage, ServerResponse } from 'http';
+const fs = require("fs");
+const path = require("path");
+const { IncomingForm } = require("formidable");
 
-// Disable Next.js body parser for this route
 export const config = {
-    api: {
-        bodyParser: false, // Disable body parser
-    },
+  api: {
+    bodyParser: false, // Disable the default body parser to handle multipart/form-data
+  },
 };
 
-export default function handler(req: IncomingMessage, res: ServerResponse) {
-    if (req.method === 'POST') {
-        const chunks: Buffer[] = [];
+export default async function handler(req, res) {
+  if (req.method === "POST") {
+    const form = new IncomingForm();
 
-        req.on('data', (chunk) => {
-            chunks.push(chunk);
-        });
+    form.parse(req, (err, fields, files) => {
+      if (err) {
+        console.error("Error parsing form:", err);
+        return res.status(500).json({ message: "Error parsing form data" });
+      }
 
-        req.on('end', () => {
-            const buffer = Buffer.concat(chunks);
-            const boundary = getBoundary(req.headers['content-type'] || '');
+      // Check if the file key exists
+      if (!files.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
 
-            if (boundary) {
-                const [fileData] = parseMultipartFormData(buffer, boundary);
-                const filePath = path.join(process.cwd(), 'uploads', fileData.filename);
+      const uploadedFile = files.file;
 
-                // Create 'uploads' directory if it doesn't exist
-                if (!fs.existsSync('uploads')) {
-                    fs.mkdirSync('uploads');
-                }
+      // Define the file path where the file will be saved
+      const uploadDir = path.join(process.cwd(), "public", "uploads");
+      const filePath = path.join(uploadDir, uploadedFile.originalFilename);
 
-                // Write file to disk
-                fs.writeFile(filePath, fileData.content, (err) => {
-                    if (err) {
-                        res.status(500).json({ error: 'File upload failed' });
-                        return;
-                    }
+      // Ensure the uploads directory exists
+      fs.mkdirSync(uploadDir, { recursive: true });
 
-                    res.status(200).json({
-                        message: 'File uploaded successfully!',
-                        file: {
-                            originalName: fileData.filename,
-                            filePath,
-                            size: fileData.content.length,
-                        },
-                    });
-                });
-            } else {
-                res.status(400).json({ error: 'Invalid request format' });
-            }
-        });
-    } else {
-        res.status(405).json({ error: 'Method Not Allowed' });
-    }
-}
+      // Move the file to the uploads directory
+      fs.renameSync(uploadedFile.filepath, filePath);
 
-// Helper function to get the boundary from the Content-Type header
-function getBoundary(contentType: string): string | null {
-    const match = contentType.match(/boundary=([^\s;]+)/);
-    return match ? match[1] : null;
-}
-
-// Simple function to parse multipart form data manually
-function parseMultipartFormData(buffer: Buffer, boundary: string) {
-    const boundaryBuffer = Buffer.from(`--${boundary}`);
-    const parts: any[] = [];
-
-    // Split the incoming buffer into sections by the boundary
-    const sections = buffer.split(boundaryBuffer);
-    for (let section of sections) {
-        if (section.length === 0) continue;
-
-        // Find the content disposition header and extract filename and content
-        const contentDispositionMatch = section.toString().match(/Content-Disposition: form-data; name="file"; filename="([^"]+)"/);
-        if (contentDispositionMatch) {
-            const filename = contentDispositionMatch[1];
-            const contentStartIndex = section.indexOf('\r\n\r\n') + 4;
-            const content = section.slice(contentStartIndex);
-
-            parts.push({
-                filename,
-                content,
-            });
-        }
-    }
-
-    return parts;
+      res
+        .status(200)
+        .json({ message: "File uploaded successfully!", filePath });
+    });
+  } else {
+    res.status(405).json({ message: "Method not allowed" });
+  }
 }
