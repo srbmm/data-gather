@@ -1,6 +1,5 @@
 import type {CheckboxProps, FileInputProps, SelectProps, TextareaProps, TextInputProps} from "flowbite-react";
 import type {OptionType} from "~/types";
-import {FieldErrors} from "react-hook-form/dist/types/errors";
 
 interface CustomCheckboxProps extends CheckboxProps {
     label?: string;
