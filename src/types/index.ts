@@ -28,6 +28,11 @@ export interface Form {
     name: string;
 }
 
+export interface RandomData {
+    enabled: boolean;
+    items: string; // Store items as a string before processing as JSON
+}
+
 
 export type FormsError = Record<string, Record<string, FieldErrors<unknown>>>;
 export type FormsData = Record<string, Record<string, unknown>>;
