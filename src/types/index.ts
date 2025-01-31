@@ -1,5 +1,4 @@
 import {FieldErrors} from "react-hook-form/dist/types/errors";
-import { z } from "zod";
 
 export interface OptionType {
     label: string;
@@ -22,7 +21,7 @@ export interface FormField {
 }
 
 export interface Form {
-    id: string;
+    _id?: string;
     topic: string;
     description: string;
     fields: FormField[];
@@ -30,7 +29,6 @@ export interface Form {
 }
 
 export interface RandomData {
-    enabled: boolean;
     items: string; // Store items as a string before processing as JSON
 }
 

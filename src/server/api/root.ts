@@ -1,5 +1,7 @@
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
-import { formRouter, entryRouter } from "./routers/route";
+import { formRouter, entryRouter} from "./routers/route";
+import { uploadRouter } from "./routers/uploadRouter";
+import { stringListRouter } from "./routers/stringListRouter";
 
 /**
  * This is the primary router for your server.
@@ -9,6 +11,8 @@ import { formRouter, entryRouter } from "./routers/route";
 export const appRouter = createTRPCRouter({
   form: formRouter,
   entry: entryRouter,
+  upload: uploadRouter,
+  stringList: stringListRouter,
 });
 
 // export type definition of API

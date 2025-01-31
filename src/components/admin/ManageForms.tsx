@@ -1,6 +1,8 @@
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import { useForm, useFieldArray, Controller, useWatch } from "react-hook-form";
-import {Modal, Button, TextInput, Select, Checkbox, Label, Textarea} from "flowbite-react";
+import { Modal, Button, TextInput, Select, Checkbox, Label, Textarea } from "flowbite-react";
+import { api } from "~/utils/api";
+import { strToLabelValue } from "~/utils/strToLabelValue";
 
 // Ensure you have these imports for handling the form and field data
 interface FormField {
@@ -13,7 +15,7 @@ interface FormField {
     validation?: {
         regex?: string;
         maxSize?: number;
-        fileType?: string[];
+        fileType?: string;
     };
     checkboxes?: { value: string; label: string }[];
 }
@@ -26,10 +28,6 @@ interface FormData {
     fields: FormField[];
 }
 
-// Function to convert comma-separated string to array of LabelValue objects
-export const strToLabelValue = (str: string): { label: string; value: string }[] => {
-    return str.split(',').map((item) => ({ value: item.trim(), label: item.trim() }));
-};
 const FieldEditor = ({ index, field, register, control, remove, setValue }: any) => {
     const type = useWatch({
         control,
@@ -59,9 +57,7 @@ const FieldEditor = ({ index, field, register, control, remove, setValue }: any)
                 <Controller
                     control={control}
                     name={`fields.${index}.required`}
-                    render={({ field }) => (
-                        <Checkbox {...field} label="Required" />
-                    )}
+                    render={({ field }) => <Checkbox {...field} label="Required" />}
                 />
                 <Label htmlFor={`fields.${index}.label`}>Required</Label>
             </div>
@@ -77,7 +73,6 @@ const FieldEditor = ({ index, field, register, control, remove, setValue }: any)
                 </>
             )}
 
-            {/* For Select type field */}
             {type === "select" && (
                 <Controller
                     control={control}
@@ -85,11 +80,10 @@ const FieldEditor = ({ index, field, register, control, remove, setValue }: any)
                     render={({ field }) => (
                         <TextInput
                             {...field}
-                            value={field.value?.map((option: any) => option.value).join(", ")}  // Convert array to comma-separated string
+                            value={field.value?.map((option: any) => option.value).join(", ")} // Convert array to comma-separated string
                             placeholder="Options (comma separated)"
                             className="mt-2"
                             onChange={(e) => {
-                                // Convert the input string into LabelValue array
                                 const options = strToLabelValue(e.target.value);
                                 setValue(`fields.${index}.options`, options); // Update form state with parsed options
                             }}
@@ -98,7 +92,6 @@ const FieldEditor = ({ index, field, register, control, remove, setValue }: any)
                 />
             )}
 
-            {/* For Checkbox type field */}
             {type === "checkbox" && (
                 <Controller
                     control={control}
@@ -106,11 +99,10 @@ const FieldEditor = ({ index, field, register, control, remove, setValue }: any)
                     render={({ field }) => (
                         <TextInput
                             {...field}
-                            value={field.value?.map((checkbox: any) => checkbox.value).join(", ")}  // Convert array to comma-separated string
+                            value={field.value?.map((checkbox: any) => checkbox.value).join(", ")} // Convert array to comma-separated string
                             placeholder="Checkbox Items (comma separated)"
                             className="mt-2"
                             onChange={(e) => {
-                                // Convert the input string into LabelValue array
                                 const checkboxes = strToLabelValue(e.target.value);
                                 setValue(`fields.${index}.checkboxes`, checkboxes); // Update form state with parsed checkboxes
                             }}
@@ -129,26 +121,63 @@ const FormManager = () => {
     const [currentForm, setCurrentForm] = useState<FormData | null>(null);
     const [isModalOpen, setModalOpen] = useState(false);
 
+    const { data: formsData, isLoading } = api.form.getAll.useQuery();
+
     const { register, handleSubmit, control, reset, setValue } = useForm<FormData>({ defaultValues: { fields: [] } });
     const { fields, append, remove } = useFieldArray({ control, name: "fields" });
+
+    // Mutation to update all forms
+    const mutation = api.form.updateAll.useMutation();
 
     const openModal = (form?: FormData) => {
         setCurrentForm(form || null);
         reset(form || { fields: [] });
         setModalOpen(true);
     };
+    useEffect(() =>{
+        if(!formsData) return
+        setForms(formsData);
+    }, [formsData])
 
     const onSubmit = (data: FormData) => {
         if (currentForm) {
-            setForms((prev) => prev.map((form) => (form.id === currentForm.id ? { ...data, id: currentForm.id } : form)));
-        } else {
-            setForms((prev) => [...prev, { ...data, id: crypto.randomUUID() }]);
+            setForms((prev) =>
+                prev.map((form) =>
+                    form.id === currentForm.id
+                        ? {
+                            ...data,
+                            id: currentForm.id,
+                            fields: data.fields.map((field: any) => {
+                                // Check if the field has a validation and maxSize, and convert it to a number
+                                    return {
+                                        ...field,
+                                        validation: {
+                                            ...field.validation,
+                                            maxSize: Number(field.validation.maxSize), // Cast maxSize to number
+                                        },
+                                    };
+                                return field;
+                            }),
+                        }
+                        : form
+                )
+            );        } else {
+            setForms((prev) => [...prev, { ...data }]);
         }
         setModalOpen(false);
     };
 
     const deleteForm = (id: string) => {
         setForms(forms.filter((form) => form.id !== id));
+    };
+
+    const saveConfiguration = async () => {
+        try {
+            await mutation.mutateAsync(forms); // Call the mutation to update all forms
+            console.log('Forms updated successfully');
+        } catch (error) {
+            console.error('Error updating forms:', error);
+        }
     };
 
     return (
@@ -168,7 +197,9 @@ const FormManager = () => {
                     </div>
                 ))}
             </div>
-            <Button onClick={() => console.log(forms)}>Save</Button>
+            <Button onClick={saveConfiguration} disabled={mutation.isPending}>
+                {mutation.isPending ? "Saving..." : "Save Configuration"}
+            </Button>
             <Modal show={isModalOpen} onClose={() => setModalOpen(false)}>
                 <Modal.Header>Create/Edit Form</Modal.Header>
                 <Modal.Body>
@@ -182,7 +213,9 @@ const FormManager = () => {
                         ))}
 
                         <Button onClick={() => append({ id: crypto.randomUUID(), name: "", type: "text" })} className="mt-4 w-full">Add Field</Button>
-                        <Button type="submit" className="mt-4 w-full">Save Form</Button>
+                        <Button type="submit" className="mt-4 w-full">
+                            Save Form
+                        </Button>
                     </form>
                 </Modal.Body>
             </Modal>

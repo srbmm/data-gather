@@ -6,10 +6,32 @@ import {
   CustomSelect,
   CustomFileInput,
   CustomCheckbox,
-} from "./../inputs";
+} from "../inputs";
 import { DynamicFormProps, FormFieldProps } from "~/components/form/types";
 import { FieldErrors } from "react-hook-form/dist/types/errors";
 import { isEqual } from "lodash";
+import { api } from "~/utils/api";
+
+// Helper function to handle file upload
+const uploadFile = async (file: File) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  try {
+    const response = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) throw new Error("File upload failed");
+
+    const data = await response.json();
+    return data; // { originalName, uuidFileName, fileSize }
+  } catch (error) {
+    console.error("Upload error:", error);
+    return null;
+  }
+};
 
 const DynamicForm = forwardRef<
   { triggerValidation: () => Promise<boolean> },
@@ -24,6 +46,8 @@ const DynamicForm = forwardRef<
     mode: "onChange",
     defaultValues,
   });
+
+  const { mutateAsync, error } = api.upload.uploadFile.useMutation();
 
   const [tempErrors, setTempErrors] = useState<FieldErrors<unknown>>({});
   if (!isEqual(tempErrors, errors)) {
@@ -57,7 +81,6 @@ const DynamicForm = forwardRef<
       errorText,
       checkboxes,
     } = field;
-
     const fieldId = id; // Ensure every input has an ID
 
     switch (type) {
@@ -127,28 +150,39 @@ const DynamicForm = forwardRef<
           <Controller
             name={name}
             control={control}
+            defaultValue={defaultValues?.[name] || null}
             rules={{
               required: required ? `${label ?? name} is required` : undefined,
-              validate: (fileList: FileList) => {
-                const file = fileList?.[0];
+              validate: (fileData) => {
+                if (!fileData) return "File is required";
                 if (
-                  file?.size &&
                   validation?.maxSize &&
-                  file?.size > validation.maxSize
+                  fileData.fileSize > validation.maxSize
                 ) {
                   return `File size exceeds ${validation.maxSize / 1024 / 1024}MB`;
                 }
-
                 return true;
               },
             }}
             render={({ field: { onChange, value, ...rest } }) => (
               <CustomFileInput
                 {...rest}
-                onChange={(e) => {
-                  if (!e) return onChange(null);
-                  const file = e.target.files?.[0];
-                  onChange(file); // Pass the file object to the form
+                onChange={async (e) => {
+                  if (!e.target.files || e.target.files.length === 0) return;
+
+                  const file = e.target.files[0];
+
+                  // Upload file and get response
+                  const uploadedFile = await uploadFile(file)
+                  console.log(uploadedFile)
+                  if (!uploadedFile) return;
+
+                  // Set uploaded file data in form
+                  onChange({
+                    originalName: uploadedFile.originalName,
+                    uuidFileName: uploadedFile.uuidFileName,
+                    fileSize: uploadedFile.fileSize,
+                  });
                 }}
                 accept={validation?.fileType?.join(", ")}
                 id={fieldId}
